@@ -1,8 +1,5 @@
 name: ci-golang-workflow
 on:
-  push:
-    branches:
-      - feature/github-actions
   pull_request:
     branches:
       - master
