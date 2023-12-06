@@ -4,6 +4,8 @@ import "strconv"
 
 type Data struct {
 	Quote Quote
+	url   string
+	html  string
 }
 
 type Quote struct {

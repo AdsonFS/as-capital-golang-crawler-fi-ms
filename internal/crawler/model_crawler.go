@@ -1,4 +1,4 @@
-package crwaler
+package crawler
 
 import (
 	"io"
@@ -7,12 +7,12 @@ import (
 	"sort"
 )
 
-type Crwaler struct {
+type Crawler struct {
 	fiisUrl []string
 }
 
-func NewCrawler() (Crwaler, error) {
-	crawler := Crwaler{[]string{}}
+func NewCrawler() (Crawler, error) {
+	crawler := Crawler{[]string{}}
 	url := "https://fiis.com.br/lista-de-fundos-imobiliarios/"
 	resp, err := http.Get(url)
 	if err != nil {
