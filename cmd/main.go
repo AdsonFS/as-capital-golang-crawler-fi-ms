@@ -1,16 +1,13 @@
 package main
 
 import (
-	fisolver "as-capital-crawler-fi-ms/internal/fi_solver"
-	"fmt"
+	"as-capital-crawler-fi-ms/internal/api/routes"
+
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
-	data, err := fisolver.GetData("mana11")
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(data.Quote.Current)
-	fmt.Println(data.Quote.Min)
-	fmt.Println(data.Quote.Max)
+	app := gin.Default()
+	routes.AppRoutes(app)
+	app.Run(":3001")
 }
