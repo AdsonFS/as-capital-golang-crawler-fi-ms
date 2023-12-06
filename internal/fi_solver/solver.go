@@ -12,13 +12,14 @@ import (
 )
 
 func GetData(name string) (Data, error) {
+	redisRepository := redis_repository.NewRedisRepository()
 	ctx := context.Background()
-	dataRedis := redis_repository.Get(ctx, name)
+	dataRedis := redisRepository.Get(ctx, name)
 	if len(dataRedis) == 0 {
 		fmt.Println("Buscando no site")
 		data, err := newData(fmt.Sprintf("https://fiis.com.br/%s/", name))
 		if err == nil {
-			redis_repository.Save(ctx, name, data.ToMap())
+			redisRepository.Save(ctx, name, data.ToMap())
 		}
 		return data, err
 	}
@@ -27,6 +28,7 @@ func GetData(name string) (Data, error) {
 }
 
 func newData(url string) (Data, error) {
+	data := Data{}
 	resp, err := http.Get(url)
 	if err != nil {
 		return Data{}, err
@@ -37,34 +39,33 @@ func newData(url string) (Data, error) {
 	if err != nil {
 		return Data{}, err
 	}
+	data.html = string(htmlString)
 
-	quotes, err := extractPrice(string(htmlString))
+	err = data.extractPrice()
 	if err != nil {
 		return Data{}, err
 	}
-	return Data{
-		Quote: quotes,
-	}, nil
+	return data, nil
 }
 
-func extractPrice(html string) (Quote, error) {
+func (data *Data) extractPrice() error {
 	re := regexp.MustCompile(`<div>\s*<span class="currency">R\$</span>\s*<span class="value">([0-9,]+)</span>`)
-	matches := re.FindAllStringSubmatch(html, -1)
+	matches := re.FindAllStringSubmatch(data.html, -1)
 
 	if len(matches) < 3 {
-		return Quote{}, fmt.Errorf("não foi possível encontrar o preço no HTML")
+		return fmt.Errorf("não foi possível encontrar o preço no HTML")
 	}
 
 	currentQuoteStr := strings.ReplaceAll(matches[0][1], ",", ".")
 	minQuoteStr := strings.ReplaceAll(matches[1][1], ",", ".")
 	maxQuoteStr := strings.ReplaceAll(matches[2][1], ",", ".")
 
-	currentQuote, err1 := strconv.ParseFloat(currentQuoteStr, 64)
-	minQuote, err2 := strconv.ParseFloat(minQuoteStr, 64)
-	maxQuote, err3 := strconv.ParseFloat(maxQuoteStr, 64)
+	var err1, err2, err3 error
+	data.Quote.Current, err1 = strconv.ParseFloat(currentQuoteStr, 64)
+	data.Quote.Min, err2 = strconv.ParseFloat(minQuoteStr, 64)
+	data.Quote.Max, err3 = strconv.ParseFloat(maxQuoteStr, 64)
 	if err1 != nil || err2 != nil || err3 != nil {
-		return Quote{}, fmt.Errorf("erro ao converter preço para float64")
+		return fmt.Errorf("erro ao converter preço para float64")
 	}
-
-	return Quote{Current: currentQuote, Min: minQuote, Max: maxQuote}, nil
+	return nil
 }
