@@ -8,4 +8,4 @@ COPY . .
 
 RUN go build -o fi-ms cmd/main.go 
 
-CMD ["./fi-ms"]
+CMD ["./fi-ms -redis=redis:6379"]
