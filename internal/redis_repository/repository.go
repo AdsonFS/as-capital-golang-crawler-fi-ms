@@ -2,6 +2,7 @@ package redis_repository
 
 import (
 	"context"
+	"flag"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -18,8 +19,10 @@ func NewRedisRepository() *RedisRepository {
 		redisRepository = &RedisRepository{}
 	}
 	if redisRepository.client == nil {
+		redisHost := flag.String("redis", "localhost:6379", "host:port")
+		flag.Parse()
 		redisRepository.client = redis.NewClient(&redis.Options{
-			Addr: ":6379",
+			Addr: *redisHost,
 		})
 	}
 	return redisRepository
