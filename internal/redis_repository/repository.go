@@ -20,9 +20,11 @@ func NewRedisRepository() *RedisRepository {
 	}
 	if redisRepository.client == nil {
 		redisHost := flag.String("redis", "localhost:6379", "host:port")
+		redisPass := flag.String("pass", "", "string")
 		flag.Parse()
 		redisRepository.client = redis.NewClient(&redis.Options{
-			Addr: *redisHost,
+			Addr:     *redisHost,
+			Password: *redisPass,
 		})
 	}
 	return redisRepository
